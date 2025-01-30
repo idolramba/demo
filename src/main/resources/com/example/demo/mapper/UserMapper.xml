@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMapper">	<!-- mapper 인터페이스가 위치하는 경로 -->
+    <select id="getUserList" resultType="com.example.demo.vo.UserVo">	<!-- id: mapper 인터페이스에서 선언한 메서드 이름과 같아야 한다. resultType: VO 클래스가 위치하는 경로 -->
+        SELECT *
+        FROM user	<!-- SQL문 작성 -->
+    </select>
+
+    <!-- 사용자 삭제 쿼리 -->
+    <delete id="deleteUsersByIds" parameterType="java.util.List">
+        DELETE FROM user
+        WHERE id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 즐겨찿기리스트 조회-->
+    <select id="getFavrList" resultType="com.example.demo.dto.FavrDto">	<!-- id: mapper 인터페이스에서 선언한 메서드 이름과 같아야 한다. resultType: VO 클래스가 위치하는 경로 -->
+        SELECT id, name
+        FROM favotire
+    </select>
+
+    <!-- 결재선리스트 조회-->
+    <select id="getAprvListById" resultType="com.example.demo.dto.FavrDto">	<!-- id: mapper 인터페이스에서 선언한 메서드 이름과 같아야 한다. resultType: VO 클래스가 위치하는 경로 -->
+        select empl1 as empl, dept1 as dept, jikwi1 as jikwi, type1 as type from favotire f where id = #{id}
+        union all
+        select empl2 as empl, dept2 as dept, jikwi2 as jikwi, type2 as type from favotire f where id = #{id}
+        union all
+        select empl3 as empl, dept3 as dept, jikwi3 as jikwi, type3 as type from favotire f where id = #{id}
+        union all
+        select empl4 as empl, dept4 as dept, jikwi4 as jikwi, type4 as type from favotire f where id = #{id}
+        union all
+        select empl5 as empl, dept5 as dept, jikwi5 as jikwi, type5 as type from favotire f where id = #{id}
+        union all
+        select empl6 as empl, dept6 as dept, jikwi6 as jikwi, type6 as type from favotire f where id = #{id}
+        union all
+        select empl7 as empl, dept7 as dept, jikwi7 as jikwi, type7 as type from favotire f where id = #{id}
+        union all
+        select empl8 as empl, dept8 as dept, jikwi8 as jikwi, type8 as type from favotire f where id = #{id}
+    </select>
+
+    <!-- 즐겨찿기 삭제 -->
+    <delete id="delFavrByIds" parameterType="java.util.List">
+        DELETE FROM favotire
+        WHERE id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>User List</title>
+</head>
+<style>
+        .selected {
+            background-color: #cce5ff; /* 선택된 행을 파란색으로 강조 */
+            font-weight: bold;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .action-buttons {
+            margin-bottom: 20px;
+        }
+
+        .action-buttons button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* 전체 레이아웃을 flexbox로 설정 */
+        .container {
+          display: flex;
+          gap: 20px;
+        }
+
+        /* 마스터 테이블 스타일 */
+        table {
+          border-collapse: collapse;
+          width: 30%;
+        }
+
+        th, td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+        }
+
+        /* 디테일 테이블 스타일 */
+        #detail {
+          width: 70%;
+          table-layout: fixed;
+        }
+
+        #detail table {
+          width: 100%;
+        }
+
+</style>
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<body>
+<h2>User List</h2>
+<div class="action-buttons">
+    <button id="refreshButton">조회</button>
+    <button id="deleteButton">삭제</button>
+</div>
+<div class="container">
+    <table id="favrTable" border="1">
+        <thead>
+        <tr>
+            <th>선택</th>
+            <th>순번</th>
+            <th>즐겨찿기명</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 초기 데이터는 비워둠 -->
+        </tbody>
+    </table>
+
+
+    <!-- 디테일 테이블 -->
+    <div id="detail">
+        <table id="detailTable">
+            <thead>
+            <tr>
+                <th>성명</th>
+                <th>부서</th>
+                <th>직위</th>
+                <th>결재타입</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- 초기 데이터는 비워둠 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        const rows = document.querySelectorAll('table tbody tr');
+        const detail = document.getElementById('detail');
+
+        // 페이지 로드 시 데이터 조회
+        loadUserData();
+
+        // 조회 버튼 클릭 시 데이터 조회
+        $('#refreshButton').click(function() {
+            loadUserData();
+        });
+
+        rows.forEach(row => {
+            row.addEventListener('click', function() {
+                alert('aaaaa');
+            });
+        });
+
+        // 데이터 조회 함수
+        function loadUserData() {
+            $.ajax({
+                url: '/favrList',  // 서버의 요청 URL
+                type: 'GET',           // 요청 방식 (GET, POST 등)
+                success: function(response) {
+                    // 요청 성공 시 응답 데이터 처리
+                    console.log("response = " + JSON.stringify(response));
+
+                    // 테이블의 tbody를 비운 후 새로운 데이터로 채운다.
+                    var tableBody = $("#favrTable tbody");
+                    tableBody.empty(); // 기존 데이터를 지운다.
+
+                    // 응답 데이터를 이용해 테이블 행을 생성
+                    response.forEach(function(item) {
+                        // 행 생성
+                        var row = $("<tr>").attr("data-id", item.id);
+
+                        // 체크박스 열 추가
+                        var checkboxCell = $("<td>").append(
+                            $("<input>").attr({
+                                type: 'checkbox',
+                                class: 'userCheckbox',
+                                value: item.id
+                            })
+                        );
+                        row.append(checkboxCell);
+
+                        // 각 열 추가
+                        row.append($("<td>").text(item.id));
+                        row.append($("<td>").text(item.name));
+                        // 테이블에 행 추가
+                        tableBody.append(row);
+                    });
+
+                    // 첫 번째 항목이 있으면 자동으로 클릭
+                    if (response.length > 0) {
+                        // 첫 번째 항목 클릭 시 디테일 조회
+                        $('#favrTable tbody tr:first').trigger('click');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // 오류 발생 시 처리
+                    alert("오류 발생: " + error);
+                }
+            });
+        }
+
+        // 삭제 버튼 클릭 시 선택된 사용자 삭제
+        $('#deleteButton').click(function() {
+            let selectedUsers = [];
+            $('.userCheckbox:checked').each(function() {
+                selectedUsers.push( Number( $(this).val() ) );
+            });
+
+
+            if (selectedUsers.length > 0) {
+                if (confirm('선택한 즐겨찿기를 삭제하시겠습니까?')) {
+                    $.ajax({
+                        url: '/deleteFavr', // 삭제 요청을 처리할 서버 URL
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(selectedUsers) ,
+                        success: function(response) {
+                            alert('삭제되었습니다.');
+                            loadUserData(); // 삭제 후 데이터 다시 로드
+                        },
+                        error: function() {
+                            alert('삭제 중 오류가 발생했습니다.');
+                        }
+                    });
+                }
+            } else {
+                alert('삭제할 사용자를 선택해주세요.');
+            }
+        });
+
+        // 마스터 테이블의 행 클릭 이벤트를 위임하여 처리
+        $('#favrTable').on('click', 'tbody tr', function() {
+            // 다른 행에서 'selected' 클래스 제거
+            $('#favrTable tbody tr').removeClass('selected');
+            // 클릭된 행에 'selected' 클래스 추가
+            $(this).addClass('selected');
+
+            var favrId = $(this).data('id');
+
+            // 클릭된 행의 디테일을 채우는 추가 로직을 여기서 처리할 수 있습니다.
+            // 예를 들어, 디테일 정보를 AJAX로 가져와서 #detail 테이블에 채운다거나 할 수 있습니다.
+            $.ajax({
+                url: '/apvrList',  // 서버의 요청 URL
+                type: 'GET',           // 요청 방식 (GET, POST 등)
+                data: { id: favrId },
+                success: function(response) {
+                    // 요청 성공 시 응답 데이터 처리
+                    console.log("response = " + JSON.stringify(response));
+
+                    // 테이블의 tbody를 비운 후 새로운 데이터로 채운다.
+                    var tableBody = $("#detailTable tbody");
+                    tableBody.empty(); // 기존 데이터를 지운다.
+
+                    // 응답 데이터를 이용해 테이블 행을 생성
+
+                    response.forEach(function(item) {
+                        if (item && item.empl) {
+                            // 행 생성
+                            var row = $("<tr>");
+
+                            // 각 열 추가
+                            row.append($("<td>").text(item.empl));
+                            row.append($("<td>").text(item.dept));
+                            row.append($("<td>").text(item.jikwi));
+                            row.append($("<td>").text(item.type));
+                            // 테이블에 행 추가
+                            tableBody.append(row);
+                        } else {
+                            console.warn('유효하지 않은 아이템 또는 empl 속성이 없음: ', item);
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // 오류 발생 시 처리
+                    alert("오류 발생: " + error);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

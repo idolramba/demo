@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: demo
+  mvc:
+    static-path-pattern: /resources/**
+  datasource:
+    url: jdbc:log4jdbc:mariadb://localhost:3306/study?characterEncoding=utf-8 # MariaDB URL (여기서 'your_database_name'을 실제 DB명으로 변경)
+    username: root  # MariaDB 사용자명
+    password: Sdh3188!  # MariaDB 비밀번호
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy  # org.mariadb.jdbc.Driver  # MariaDB 드라이버 클래스
+    hikari:
+      maximum-pool-size: 10  # 커넥션 풀 최대 크기 (옵션, 필요에 따라 설정)
+      minimum-idle: 5  # 최소 유휴 커넥션 수 (옵션, 필요에 따라 설정)
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: false # 자동 재시작 비활성화
+      additional-paths: # 재시작 트리거가 되는 폴더 지정
+        - src/main/java
+      exclude: # 재시작 제외 폴더 설정
+        - static/**
+        - public/**
+  mybatis:
+    mapper-locations=mapper/**/*.xml
+  thymeleaf:
+    cache: false
+thymeleaf:
+  mode: HTML
+  suffix: html
+  prefix: classpath:/templates/
+  cache: false
+  encoding: UTF-8
+
+
+
+
