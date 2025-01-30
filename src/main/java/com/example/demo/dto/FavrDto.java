@@ -12,5 +12,4 @@ public class FavrDto {
     private String dept;
     private String jikwi;
     private String type;
-
 }
