@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>외부 HTML 파일로 팝업 처리</title>
+    <style>
+        /* 배경 그레이 아웃 */
+        .modal {
+            display: none; /* 기본적으로 숨김 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* 배경 흐림 */
+            z-index: 1; /* 다른 콘텐츠 위에 표시 */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 팝업 내용 */
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            text-align: center;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        /* 닫기 버튼 */
+        .close-btn {
+            font-size: 20px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: black;
+        }
+    </style>
+</head>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<body>
+
+<h1>외부 HTML 파일로 첫 번째 및 두 번째 팝업 처리</h1>
+
+<!-- 외부 HTML 파일을 불러오는 버튼 -->
+<button id="load-content-btn">외부 HTML 파일 로드 (첫 번째 팝업)</button>
+
+<!-- 첫 번째 팝업 (모달) -->
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span id="close-btn" class="close-btn">&times;</span>
+        <div id="popup-body">
+            test1<!-- 첫 번째 팝업 내용 -->
+        </div>
+    </div>
+</div>
+
+<!-- 두 번째 팝업 (모달) -->
+<div id="secondModal" class="modal">
+    <div class="modal-content">
+        <span id="close-second-btn" class="close-btn">&times;</span>
+        <div id="second-popup-body">
+            test2<!-- 두 번째 팝업 내용 -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // 모달과 관련된 요소들
+    const modal = document.getElementById('myModal');
+    const secondModal = document.getElementById('secondModal');
+    const openModalBtn = document.getElementById('load-content-btn');
+    const openSecongBtn = document.getElementById('open-second-popup-btn');
+
+    const closeBtn = document.getElementById('close-btn');
+    const closeSecondBtn = document.getElementById('close-second-btn');
+
+    const popupBody = document.getElementById('popup-body');
+    const secondPopupBody = document.getElementById('second-popup-body');
+
+    // 첫 번째 팝업 열기
+    openModalBtn.addEventListener('click', () => {
+        // 첫 번째 팝업 외부 HTML 파일 로드
+        fetch('/content')  // 외부 HTML 파일을 가져옵니다.
+            .then(response => {
+                if (response.ok) {
+                    return response.text();  // 파일 내용을 텍스트로 반환
+                } else {
+                    throw new Error('파일을 불러오는 데 실패했습니다.');
+                }
+            })
+            .then(data => {
+                // 외부 HTML 내용을 첫 번째 팝업에 삽입
+                popupBody.innerHTML = data;
+                modal.style.display = 'flex';  // 첫 번째 팝업을 화면에 표시
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+
+    // 첫 번째 팝업 닫기
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';  // 첫 번째 팝업을 숨김
+    });
+
+    // 두 번째 팝업 닫기
+    closeSecondBtn.addEventListener('click', () => {
+        secondModal.style.display = 'none';  // 두 번째 팝업을 숨김
+    });
+
+    // 첫 번째 팝업 외부 클릭 시 닫기
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';  // 첫 번째 팝업을 숨김
+        }
+    });
+
+    // 두 번째 팝업 열기 (첫 번째 팝업에서)
+    document.addEventListener('click', (event) => {
+        if (event.target && event.target.id === 'open-second-popup-btn') {
+            // 두 번째 팝업 외부 HTML 파일 로드
+            fetch('/index?id=1')  // 두 번째 팝업 HTML 파일을 가져옵니다.
+            .then(response => {
+                if (response.ok) {
+                    return response.text();  // 파일 내용을 텍스트로 반환
+                } else {
+                    throw new Error('파일을 불러오는 데 실패했습니다.');
+                }
+            })
+            .then(text => {
+                // 외부 HTML 내용을 두 번째 팝업에 삽입
+                secondPopupBody.innerHTML = text;
+
+                executeScripts(secondPopupBody);
+
+                secondModal.style.display = 'flex';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+
+    // 두 번째 팝업에서 첫 번째 팝업으로 돌아가기
+    document.addEventListener('click', (event) => {
+        if (event.target && event.target.id === 'close-second-popup-btn') {
+            // 첫 번째 팝업 외부 HTML 파일 로드 (다시 첫 번째 팝업으로 돌아감)
+            fetch('/content')  // 첫 번째 팝업 외부 HTML 파일을 다시 로드
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();  // 파일 내용을 텍스트로 반환
+                    } else {
+                        throw new Error('파일을 불러오는 데 실패했습니다.');
+                    }
+                })
+                .then(data => {
+                    // 외부 HTML 내용을 첫 번째 팝업에 삽입
+                    popupBody.innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    });
+
+    // ESC 키로 팝업 닫기
+    window.addEventListener('keydown', (event) => {
+        if (event.key === "Escape") {
+            modal.style.display = 'none';  // 팝업을 숨김
+        }
+    });
+
+    // 외부 HTML 내용에 포함된 스크립트 실행
+    function executeScripts(container) {
+        const scripts = container.querySelectorAll('script');
+        scripts.forEach(script => {
+            const newScript = document.createElement('script');
+            if (script.src) {
+                newScript.src = script.src;
+            } else {
+                newScript.innerHTML = script.innerHTML;
+            }
+            document.body.appendChild(newScript); // 스크립트 실행
+            //document.body.removeChild(newScript); // 실행 후 스크립트 요소 제거
+        });
+    }
+
+    // 두 번째 팝업에서 데이터를 받아 화면에 표시하는 함수
+    function receiveDataFromSecondPopup(data) {
+        console.log("data ===> ",data) ;
+    }
+</script>
+
+</body>
+</html>

@@ -24,8 +24,8 @@ public class UserService {
         userMapper.deleteUsersByIds(userIds);
     }
 
-    public List<FavrDto> getFavrList() {
-        return userMapper.getFavrList();
+    public List<FavrDto> getFavrList(Long id) {
+        return userMapper.getFavrList(id);
     }
 
     public List<FavrDto> getAprvListById(Long id) {

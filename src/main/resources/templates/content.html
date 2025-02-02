@@ -1,0 +1,49 @@
+<div>
+    <h2>첫 번째 팝업 내용</h2>
+    <p>이 팝업에서 또 다른 팝업을 띄울 수 있습니다.</p>
+    <button id="open-second-popup-btn">두 번째 팝업 열기</button>
+</div>
+
+<script>
+    function openPop(url, options) {
+    alert(self != top);
+        if (self != top) {
+            window.parent.openPop(url, options);
+            return;
+        }
+
+        let $container = document.getElementById('popup-container');
+        if ($container instanceof HTMLDivElement === false) {
+            $container = document.createElement('div');
+            $container.id = 'popup-container';
+            $container.className = 'popup-container';
+            $container.style.opacity = '1';
+            $container.style.display = 'block';
+            document.body.appendChild($container);
+        }
+        $container.innerHTML = '';
+
+        const popId = _.camelCase(_.nth(_.split(url, '/'), -2));
+        if (!_.isEmpty(window[popId])) {
+            window[popId].open(options);
+        } else {
+            fetch(url)
+            .then(response => {
+                return response.text();
+            })
+            .then(text => {
+    console.log("text : ", text);
+                $container.innerHTML = text;
+                Ustra.docReady(function() {
+                    Array.from($container.querySelectorAll('script')).forEach(function(item) {
+                        eval.apply(this, [item.textContent]);
+                    });
+
+                    if (!_.isEmpty(window[popId])) {
+                        window[popId].open(options);
+                    }
+                }, $container);
+            });
+        }
+    }
+</script>

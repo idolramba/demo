@@ -72,11 +72,13 @@ public class UserController {
 
     @GetMapping("/favrList")
     @ResponseBody
-    public List<FavrDto> getFavrList(Model model) {
-        List<FavrDto> favrList = userService.getFavrList();
-        model.addAttribute("list", favrList);
+    public List<FavrDto> getFavrList(@RequestParam("id") Long id) {
+        log.info("id = {}", id);
 
-        log.info("userList {}", favrList);
+        List<FavrDto> favrList = userService.getFavrList(id);
+        //model.addAttribute("list", favrList);
+
+        log.info("userList = {}", favrList);
         return favrList;
     }
 

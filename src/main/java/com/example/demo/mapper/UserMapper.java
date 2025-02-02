@@ -10,7 +10,7 @@ import java.util.List;
 public interface UserMapper {
     List<UserVo> getUserList();
     void deleteUsersByIds(List<Long> userIds);
-    List <FavrDto> getFavrList();
+    List <FavrDto> getFavrList(Long id);
     List <FavrDto> getAprvListById(Long id);
     void delFavrByIds(List<Long> favrId);
 }

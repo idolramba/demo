@@ -65,6 +65,7 @@
 <div class="action-buttons">
     <button id="refreshButton">조회</button>
     <button id="deleteButton">삭제</button>
+    <button id="selectButton">선택</button>
 </div>
 <div class="container">
     <table id="favrTable" border="1">
@@ -121,7 +122,7 @@
         // 데이터 조회 함수
         function loadUserData() {
             $.ajax({
-                url: '/favrList',  // 서버의 요청 URL
+                url: '/favrList?id=1',  // 서버의 요청 URL
                 type: 'GET',           // 요청 방식 (GET, POST 등)
                 success: function(response) {
                     // 요청 성공 시 응답 데이터 처리
@@ -157,6 +158,8 @@
                     if (response.length > 0) {
                         // 첫 번째 항목 클릭 시 디테일 조회
                         $('#favrTable tbody tr:first').trigger('click');
+                    }else{
+                        $("#detailTable tbody").empty();
                     }
                 },
                 error: function(xhr, status, error) {
@@ -242,6 +245,27 @@
                     alert("오류 발생: " + error);
                 }
             });
+        });
+
+        // 선택 버튼 클릭 시
+        $('#selectButton').click(function() {
+
+            let data = [];
+
+            $("#detailTable tbody tr").each(function () {
+                var row = [];
+
+                //var empl = $(this).find("td:eq(0)").text();
+                //var dept = $(this).find("td:eq(1)").text();
+                //var jikwi = $(this).find("td:eq(2)").text();
+                //var type = $(this).find("td:eq(3)").text();
+                $(this).find("td").each(function () {
+                    row.push($(this).text());
+                });
+
+                data.push(row);
+            });
+            alert(JSON.stringify(data));
         });
     });
 </script>
