@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>Order Details</h1>
+
+<!-- 주문 상세 입력 테이블 -->
+<table id="orderDetailsTable">
+    <thead>
+    <tr>
+        <th>Product Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 기본 행은 빈 행으로 두어 사용자가 데이터를 입력할 수 있게 합니다. -->
+    <tr>
+        <td><input type="text" id="productName" placeholder="Product Name"></td>
+        <td><input type="number" id="quantity" placeholder="Quantity"></td>
+        <td><input type="number" id="price" placeholder="Price"></td>
+        <td><button onclick="addOrderDetail()">Add</button></td>
+    </tr>
+    </tbody>
+</table>
+
+<button onclick="submitOrder()">Submit Order</button>
+
+<script>
+    // orderDetails 배열을 저장할 변수
+    let orderDetails = [];
+
+    // 주문 상세 정보를 추가하는 함수
+    function addOrderDetail() {
+        // 입력된 데이터 가져오기
+        const productName = document.getElementById('productName').value;
+        const quantity = document.getElementById('quantity').value;
+        const price = document.getElementById('price').value;
+
+        // 입력값이 비어있지 않은지 확인
+        if (productName && quantity && price) {
+            // 새로운 주문 상세 객체 생성
+            const orderDetail = {
+                productName: productName,
+                quantity: parseInt(quantity),
+                price: parseFloat(price)
+            };
+
+            // orderDetails 배열에 추가
+            orderDetails.push(orderDetail);
+
+            // 테이블에 추가된 주문 상세 표시
+            const table = document.getElementById('orderDetailsTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow(table.rows.length - 1);  // 마지막 행 바로 위에 추가
+
+            newRow.innerHTML = `
+                <td>${orderDetail.productName}</td>
+                <td>${orderDetail.quantity}</td>
+                <td>${orderDetail.price}</td>
+                <td><button onclick="removeOrderDetail(this)">Remove</button></td>
+            `;
+
+            // 입력 필드를 초기화
+            document.getElementById('productName').value = '';
+            document.getElementById('quantity').value = '';
+            document.getElementById('price').value = '';
+        } else {
+            alert("Please fill in all fields.");
+        }
+    }
+
+    // 주문 상세를 테이블에서 제거하는 함수
+    function removeOrderDetail(button) {
+        const row = button.closest('tr');
+        const rowIndex = row.rowIndex - 1;  // 마지막 행은 기본 빈 행이라 제외
+        orderDetails.splice(rowIndex, 1);  // orderDetails 배열에서 해당 항목 제거
+
+        // 해당 행 삭제
+        row.remove();
+    }
+
+    // 주문 제출 시 orderDetails 배열 출력 (나중에 서버에 전송하거나 다른 처리를 할 수 있음)
+    function submitOrder() {
+        const orderNumber = generateOrderNumber();
+        const orderDate = new Date().toISOString().split('T')[0]; // 오늘 날짜 (YYYY-MM-DD);
+
+        const orderSubmissionData = {
+            orderNumber,
+            orderDate,
+            orderDetails: [...orderDetails]  // 기존 orderDetails 배열 포함
+        };
+
+        console.log("Submission data: ", JSON.stringify(orderSubmissionData));
+
+        // 서버에 전송하기 위한 예시
+        fetch('/orders', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderSubmissionData)
+        })
+    }
+
+    function generateOrderNumber() {
+         const timestamp = Date.now();
+         return `ORD-${timestamp}`;
+     }
+</script>
+</body>
+</html>
