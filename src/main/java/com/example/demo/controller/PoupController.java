@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 
 @Controller
-public class PpupController {
+public class PoupController {
     // HTML 텍스트 반환
     @RequestMapping("/main")
     public String main() {
